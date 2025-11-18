@@ -1,6 +1,13 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from typing import List, Any, Dict
+
+from schemas import Job, Application
+from database import create_document, get_documents, db
+
+# bson comes with pymongo
+from bson import ObjectId
 
 app = FastAPI()
 
@@ -12,13 +19,29 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+def serialize_doc(doc: Dict[str, Any]) -> Dict[str, Any]:
+    if not doc:
+        return doc
+    doc = dict(doc)
+    if doc.get("_id"):
+        doc["id"] = str(doc.pop("_id"))
+    # Convert any ObjectId nested values if needed
+    for k, v in list(doc.items()):
+        if isinstance(v, ObjectId):
+            doc[k] = str(v)
+    return doc
+
+
 @app.get("/")
 def read_root():
     return {"message": "Hello from FastAPI Backend!"}
 
+
 @app.get("/api/hello")
 def hello():
     return {"message": "Hello from the backend API!"}
+
 
 @app.get("/test")
 def test_database():
@@ -31,18 +54,14 @@ def test_database():
         "connection_status": "Not Connected",
         "collections": []
     }
-    
+
     try:
-        # Try to import database module
-        from database import db
-        
         if db is not None:
             response["database"] = "✅ Available"
             response["database_url"] = "✅ Configured"
             response["database_name"] = db.name if hasattr(db, 'name') else "✅ Connected"
             response["connection_status"] = "Connected"
-            
-            # Try to list collections to verify connectivity
+
             try:
                 collections = db.list_collection_names()
                 response["collections"] = collections[:10]  # Show first 10 collections
@@ -51,18 +70,146 @@ def test_database():
                 response["database"] = f"⚠️  Connected but Error: {str(e)[:50]}"
         else:
             response["database"] = "⚠️  Available but not initialized"
-            
-    except ImportError:
-        response["database"] = "❌ Database module not found (run enable-database first)"
+
     except Exception as e:
         response["database"] = f"❌ Error: {str(e)[:50]}"
-    
+
     # Check environment variables
-    import os
     response["database_url"] = "✅ Set" if os.getenv("DATABASE_URL") else "❌ Not Set"
     response["database_name"] = "✅ Set" if os.getenv("DATABASE_NAME") else "❌ Not Set"
-    
+
     return response
+
+
+# -----------------------------
+# Careers API
+# -----------------------------
+
+@app.get("/careers/jobs")
+def list_jobs() -> List[Dict[str, Any]]:
+    try:
+        docs = get_documents("job", {}, limit=None)
+        return [serialize_doc(d) for d in docs]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/careers/jobs", status_code=201)
+def create_job(job: Job) -> Dict[str, Any]:
+    try:
+        inserted_id = create_document("job", job)
+        # Fetch created document
+        doc = db["job"].find_one({"_id": ObjectId(inserted_id)})
+        return serialize_doc(doc)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/careers/jobs/{job_id}")
+def get_job(job_id: str) -> Dict[str, Any]:
+    try:
+        if not ObjectId.is_valid(job_id):
+            raise HTTPException(status_code=400, detail="Invalid job id")
+        doc = db["job"].find_one({"_id": ObjectId(job_id)})
+        if not doc:
+            raise HTTPException(status_code=404, detail="Job not found")
+        return serialize_doc(doc)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/careers/apply", status_code=201)
+def apply(application: Application) -> Dict[str, Any]:
+    try:
+        # Validate job id exists if possible
+        jid = application.job_id
+        if ObjectId.is_valid(jid):
+            exists = db["job"].find_one({"_id": ObjectId(jid)})
+            if not exists:
+                raise HTTPException(status_code=404, detail="Job not found for application")
+        inserted_id = create_document("application", application)
+        doc = db["application"].find_one({"_id": ObjectId(inserted_id)})
+        return serialize_doc(doc)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/careers/seed", status_code=201)
+def seed_jobs():
+    """Seed a few example jobs for demo purposes."""
+    try:
+        count = db["job"].count_documents({}) if db else 0
+        if count > 0:
+            return {"seeded": False, "message": "Jobs already exist"}
+        examples = [
+            {
+                "title": "Senior SEO Strategist",
+                "department": "Organic",
+                "location": "Brighton, UK",
+                "employment_type": "Full-time",
+                "description": "Lead strategy across enterprise SEO accounts, collaborating with content, UX, and dev.",
+                "responsibilities": [
+                    "Own SEO strategy for key clients",
+                    "Guide technical audits and roadmaps",
+                    "Mentor junior team members"
+                ],
+                "requirements": [
+                    "5+ years SEO experience",
+                    "Strong technical SEO skills",
+                    "Comfortable with stakeholder communication"
+                ],
+                "salary_range": "£45k–£60k DOE",
+                "remote": True
+            },
+            {
+                "title": "Performance Media Manager",
+                "department": "Media",
+                "location": "Hybrid / Brighton",
+                "employment_type": "Full-time",
+                "description": "Plan, launch and optimize paid search & social campaigns focused on measurable growth.",
+                "responsibilities": [
+                    "Own PPC & Paid Social across channels",
+                    "Implement testing frameworks",
+                    "Report insights and iterate"
+                ],
+                "requirements": [
+                    "4+ years in performance media",
+                    "Platform certifications",
+                    "Strong analytical mindset"
+                ],
+                "salary_range": "£40k–£55k DOE",
+                "remote": True
+            },
+            {
+                "title": "Product Designer (UX/UI)",
+                "department": "Creative",
+                "location": "Remote (UK)",
+                "employment_type": "Contract",
+                "description": "Design simple, beautiful product experiences across web with accessibility in mind.",
+                "responsibilities": [
+                    "Translate strategy into UX flows",
+                    "Create UI systems and prototypes",
+                    "Collaborate with dev for implementation"
+                ],
+                "requirements": [
+                    "Strong portfolio of shipped work",
+                    "Accessibility knowledge",
+                    "Proficiency in Figma"
+                ],
+                "salary_range": "Competitive",
+                "remote": True
+            }
+        ]
+        ids = []
+        for ex in examples:
+            ids.append(create_document("job", ex))
+        return {"seeded": True, "count": len(ids), "ids": ids}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":
