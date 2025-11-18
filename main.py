@@ -1,7 +1,7 @@
 import os
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Any, Dict
+from typing import List, Any, Dict, Optional
 
 from schemas import Job, Application
 from database import create_document, get_documents, db
@@ -121,15 +121,68 @@ def get_job(job_id: str) -> Dict[str, Any]:
 
 
 @app.post("/careers/apply", status_code=201)
-def apply(application: Application) -> Dict[str, Any]:
+async def apply(request: Request,
+                # Optional multipart form fields
+                job_id: Optional[str] = Form(None),
+                name: Optional[str] = Form(None),
+                email: Optional[str] = Form(None),
+                phone: Optional[str] = Form(None),
+                linkedin: Optional[str] = Form(None),
+                portfolio: Optional[str] = Form(None),
+                cover_letter: Optional[str] = Form(None),
+                consent: Optional[bool] = Form(False),
+                cv: Optional[UploadFile] = File(None),
+                portfolio_file: Optional[UploadFile] = File(None)) -> Dict[str, Any]:
+    """
+    Accepts either JSON (Application schema) or multipart/form-data with optional file uploads.
+    Files are not stored as binary to keep demo simple; we store filenames, content types and sizes.
+    """
     try:
-        # Validate job id exists if possible
-        jid = application.job_id
-        if ObjectId.is_valid(jid):
-            exists = db["job"].find_one({"_id": ObjectId(jid)})
-            if not exists:
-                raise HTTPException(status_code=404, detail="Job not found for application")
-        inserted_id = create_document("application", application)
+        payload: Dict[str, Any] = {}
+        content_type = request.headers.get("content-type", "")
+        if content_type.startswith("multipart/form-data") or job_id is not None:
+            # Build from form fields
+            payload = {
+                "job_id": job_id,
+                "name": name,
+                "email": email,
+                "phone": phone,
+                "linkedin": linkedin,
+                "portfolio": portfolio,
+                "cover_letter": cover_letter,
+                "consent": bool(consent),
+            }
+            # Validate job exists if possible
+            if payload.get("job_id") and ObjectId.is_valid(payload["job_id"]):
+                exists = db["job"].find_one({"_id": ObjectId(payload["job_id"])})
+                if not exists:
+                    raise HTTPException(status_code=404, detail="Job not found for application")
+            # Attach file metadata
+            files_meta: Dict[str, Any] = {}
+            for label, uploaded in ("cv", cv), ("portfolio_file", portfolio_file):
+                if uploaded is not None:
+                    b = await uploaded.read()
+                    files_meta[label] = {
+                        "filename": uploaded.filename,
+                        "content_type": uploaded.content_type,
+                        "size": len(b),
+                    }
+            if files_meta:
+                payload["files"] = files_meta
+        else:
+            # JSON path
+            data = await request.json()
+            # Validate with Pydantic
+            _app = Application(**data)
+            payload = _app.dict()
+            # Validate job exists if possible
+            jid = payload.get("job_id")
+            if jid and ObjectId.is_valid(jid):
+                exists = db["job"].find_one({"_id": ObjectId(jid)})
+                if not exists:
+                    raise HTTPException(status_code=404, detail="Job not found for application")
+
+        inserted_id = create_document("application", payload)
         doc = db["application"].find_one({"_id": ObjectId(inserted_id)})
         return serialize_doc(doc)
     except HTTPException:

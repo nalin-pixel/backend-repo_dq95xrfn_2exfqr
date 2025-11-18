@@ -1,19 +1,47 @@
 INFO:     Will watch for changes in these directories: ['/home/workspace']
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [195] using StatReload
-INFO:     Started server process [197]
+INFO:     Started reloader process [372] using StatReload
+INFO:     Started server process [374]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     172.20.0.1:46540 - "HEAD / HTTP/1.1" 405 Method Not Allowed
-INFO:     172.20.0.1:52760 - "GET /careers/jobs HTTP/1.1" 200 OK
-INFO:     172.20.0.1:52770 - "POST /careers/seed HTTP/1.1" 500 Internal Server Error
-INFO:     172.20.0.1:52760 - "GET /careers/jobs HTTP/1.1" 200 OK
-INFO:     172.20.0.1:52770 - "POST /careers/seed HTTP/1.1" 500 Internal Server Error
-INFO:     172.20.0.1:52760 - "GET /careers/jobs HTTP/1.1" 200 OK
-INFO:     172.20.0.1:52760 - "GET /careers/jobs HTTP/1.1" 200 OK
-INFO:     172.20.0.1:50152 - "GET /careers/jobs HTTP/1.1" 200 OK
-INFO:     172.20.0.1:50152 - "POST /careers/seed HTTP/1.1" 500 Internal Server Error
-INFO:     172.20.0.1:50166 - "GET /careers/jobs HTTP/1.1" 200 OK
-INFO:     172.20.0.1:50166 - "POST /careers/seed HTTP/1.1" 500 Internal Server Error
-INFO:     172.20.0.1:50152 - "GET /careers/jobs HTTP/1.1" 200 OK
-INFO:     172.20.0.1:50152 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:33512 - "HEAD / HTTP/1.1" 405 Method Not Allowed
+INFO:     172.20.0.1:33514 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:33524 - "POST /careers/seed HTTP/1.1" 500 Internal Server Error
+INFO:     172.20.0.1:33514 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:33524 - "POST /careers/seed HTTP/1.1" 500 Internal Server Error
+INFO:     172.20.0.1:33514 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:33514 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:45580 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:45586 - "POST /careers/seed HTTP/1.1" 500 Internal Server Error
+INFO:     172.20.0.1:45580 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:45586 - "POST /careers/seed HTTP/1.1" 500 Internal Server Error
+INFO:     172.20.0.1:45580 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:45580 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:45656 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:45664 - "POST /careers/seed HTTP/1.1" 500 Internal Server Error
+INFO:     172.20.0.1:45656 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:45664 - "POST /careers/seed HTTP/1.1" 500 Internal Server Error
+INFO:     172.20.0.1:45656 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:45656 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:53676 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:53676 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:53676 - "POST /careers/seed HTTP/1.1" 500 Internal Server Error
+INFO:     172.20.0.1:53682 - "POST /careers/seed HTTP/1.1" 500 Internal Server Error
+INFO:     172.20.0.1:53682 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:53690 - "POST /careers/seed HTTP/1.1" 500 Internal Server Error
+INFO:     172.20.0.1:53682 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:53690 - "POST /careers/seed HTTP/1.1" 500 Internal Server Error
+INFO:     172.20.0.1:53682 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:53682 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:53682 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:53690 - "POST /careers/seed HTTP/1.1" 500 Internal Server Error
+INFO:     172.20.0.1:53682 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:53690 - "POST /careers/seed HTTP/1.1" 500 Internal Server Error
+INFO:     172.20.0.1:53682 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:53682 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:51936 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:51940 - "POST /careers/seed HTTP/1.1" 500 Internal Server Error
+INFO:     172.20.0.1:51936 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:51936 - "POST /careers/seed HTTP/1.1" 500 Internal Server Error
+INFO:     172.20.0.1:51940 - "GET /careers/jobs HTTP/1.1" 200 OK
+INFO:     172.20.0.1:51940 - "GET /careers/jobs HTTP/1.1" 200 OK
